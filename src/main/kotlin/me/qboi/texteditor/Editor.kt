@@ -9,6 +9,7 @@ import java.awt.Toolkit
 import java.awt.event.ActionEvent
 import java.awt.event.WindowAdapter
 import java.awt.event.WindowEvent
+import java.awt.print.PrinterJob
 import java.io.BufferedWriter
 import java.io.File
 import java.io.FileWriter
@@ -24,6 +25,7 @@ internal class Editor(file: File?) {
     private var openFileItem: JMenuItem
     private var saveFileItem: JMenuItem
     private var saveAsFileItem: JMenuItem
+    private var pageSetupFileItem: JMenuItem
     private var printFileItem: JMenuItem
     private var closeItem: JMenuItem
     private var editMenu: JMenu
@@ -94,6 +96,7 @@ internal class Editor(file: File?) {
         saveAsFileItem = JMenuItem(action("Save As") { saveAs() }).also {
             it.accelerator = KeyStroke.getKeyStroke("control shift S")
         }
+        pageSetupFileItem = JMenuItem(action("Page Setup") { pageSetup() })
         printFileItem =
             JMenuItem(action("Print") { printFile() }).also { it.accelerator = KeyStroke.getKeyStroke("control P") }
         closeItem = JMenuItem(action("Close") { close() }).also { it.accelerator = KeyStroke.getKeyStroke("alt F4") }
@@ -139,6 +142,7 @@ internal class Editor(file: File?) {
         fileMenu.add(saveFileItem)
         fileMenu.add(saveAsFileItem)
         fileMenu.addSeparator()
+        fileMenu.add(pageSetupFileItem)
         fileMenu.add(printFileItem)
         fileMenu.addSeparator()
         fileMenu.add(closeItem)
@@ -240,6 +244,11 @@ internal class Editor(file: File?) {
 
     private fun printFile() {
         textArea.print()
+    }
+
+    private fun pageSetup() {
+        val printJob = PrinterJob.getPrinterJob()
+        printJob.pageDialog(printJob.defaultPage())
     }
 
     fun open() {

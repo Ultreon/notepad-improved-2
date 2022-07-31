@@ -8,7 +8,7 @@ plugins {
 }
 
 group = "me.qboi"
-version = properties["version"]
+version = properties["version"] as String
 
 repositories {
     mavenCentral()
@@ -53,7 +53,7 @@ tasks.jar {
             Pair("Implementation-Title", "QBubbles"),
             Pair("Implementation-Vendor", "QTech Community"),
             Pair("Implementation-Version", "1.0-indev1"),
-            Pair("Main-Class", "com.ultreon.explorers.nbt.NbtExplorer"),
+            Pair("Main-Class", "me.qboi.texteditor.MainKt"),
             Pair("Multi-Release", "true")
         ))
     }
