@@ -8,7 +8,7 @@ plugins {
 }
 
 group = "me.qboi"
-version = "1.0-SNAPSHOT"
+version = properties["version"]
 
 repositories {
     mavenCentral()

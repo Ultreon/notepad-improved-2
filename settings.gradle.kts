@@ -1,2 +1,2 @@
-rootProject.name = "darklaf-tests-2"
+rootProject.name = "qboi-text-editor"
 
