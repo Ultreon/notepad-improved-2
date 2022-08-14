@@ -1,14 +1,11 @@
 package me.qboi.texteditor
 
 import me.qboi.texteditor.dialog.font.FontChooserDialog
-import me.qboi.texteditor.dialog.settings.SettingsDialog
 import me.qboi.texteditor.intellijthemes.IJThemesPanel
 import me.qboi.texteditor.util.SearchEngine
 import java.awt.Desktop
-import java.awt.Toolkit
-import java.awt.event.ActionEvent
-import java.awt.event.WindowAdapter
-import java.awt.event.WindowEvent
+import java.awt.event.KeyAdapter
+import java.awt.event.KeyEvent
 import java.awt.print.PrinterJob
 import java.io.BufferedWriter
 import java.io.File
@@ -17,12 +14,16 @@ import java.io.IOException
 import java.nio.charset.Charset
 import javax.imageio.ImageIO
 import javax.swing.*
+import javax.swing.event.InternalFrameAdapter
+import javax.swing.event.InternalFrameEvent
 
 // Java Program to create a text editor using java
-internal class Editor(file: File?) {
+internal class Editor(file: File?, private val mainFrame: MainFrame) : JInternalFrame("Text Editor") {
+    private val baseTitle = "Editor Instance"
     private var fileMenu: JMenu
     private var newFileItem: JMenuItem
     private var openFileItem: JMenuItem
+    private var recentFilesMenu: JMenu
     private var saveFileItem: JMenuItem
     private var saveAsFileItem: JMenuItem
     private var pageSetupFileItem: JMenuItem
@@ -44,21 +45,18 @@ internal class Editor(file: File?) {
     private var viewMenu: JMenu
     private var wordWrapItem: JCheckBoxMenuItem
     private var fontItem: JMenuItem
-    private var settingsItem: JMenuItem
 
     private var lastFile: File? = null
     private var lastSavedText: String = ""
-    private val unsavedChanges: Boolean
+    val unsavedChanges: Boolean
         get() {
-            return lastSavedText != textArea.text
+            return lastSavedText != editor.text
         }
 
     // Text component
-    private var textArea: JTextArea = JTextArea()
+    private var editor: JTextArea = JTextArea()
 
     // Frame
-    private var frame: JFrame = JFrame("Text Editor")
-
     private val desktop = Desktop.getDesktop()
 
 //    private val themeSettings = ThemeSettings.getInstance()
@@ -73,14 +71,18 @@ internal class Editor(file: File?) {
 
         themesPanel = IJThemesPanel()
 
-        frame.iconImage = ImageIO.read(javaClass.getResource("/me/qboi/texteditor/icons/icon.png"))
+        val read = ImageIO.read(javaClass.getResource("/me/qboi/texteditor/icons/icon-16x.png"))
+        this.frameIcon = ImageIcon(read)
+        this.iconable = true
+        this.isDoubleBuffered = true
+        this.isRequestFocusEnabled = true
 
         // Create a menu-bar
         val menuBar = JMenuBar()
 
         // Frame window listener.
-        frame.addWindowListener(object : WindowAdapter() {
-            override fun windowClosing(e: WindowEvent) {
+        this.addInternalFrameListener(object : InternalFrameAdapter() {
+            override fun internalFrameClosing(e: InternalFrameEvent) {
                 close()
             }
         })
@@ -88,9 +90,12 @@ internal class Editor(file: File?) {
         // Create 'file' menu items
         fileMenu = JMenu("File")
         newFileItem =
-            JMenuItem(action("New") { newFile() }).also { it.accelerator = KeyStroke.getKeyStroke("control N") }
+            JMenuItem(action("New") { newFile() }).also {
+                it.accelerator = KeyStroke.getKeyStroke("control shift N")
+            }
         openFileItem =
-            JMenuItem(action("Open") { open() }).also { it.accelerator = KeyStroke.getKeyStroke("control O") }
+            JMenuItem(action("Open") { open() }).also { it.accelerator = KeyStroke.getKeyStroke("control shift O") }
+        recentFilesMenu = JMenu("Recent Files")
         saveFileItem =
             JMenuItem(action("Save") { save() }).also { it.accelerator = KeyStroke.getKeyStroke("control S") }
         saveAsFileItem = JMenuItem(action("Save As") { saveAs() }).also {
@@ -99,46 +104,56 @@ internal class Editor(file: File?) {
         pageSetupFileItem = JMenuItem(action("Page Setup") { pageSetup() })
         printFileItem =
             JMenuItem(action("Print") { printFile() }).also { it.accelerator = KeyStroke.getKeyStroke("control P") }
-        closeItem = JMenuItem(action("Close") { close() }).also { it.accelerator = KeyStroke.getKeyStroke("alt F4") }
+        closeItem =
+            JMenuItem(action("Close") { close() }).also { it.accelerator = KeyStroke.getKeyStroke("control W") }
 
         // Create 'edit' menu items
         editMenu = JMenu("Edit")
         cutItem =
-            JMenuItem(action("Cut") { textArea.cut() }).also { it.accelerator = KeyStroke.getKeyStroke("control X") }
+            JMenuItem(action("Cut") { editor.cut() }).also {
+                it.accelerator = KeyStroke.getKeyStroke("control X")
+            }
         copyItem =
-            JMenuItem(action("Copy") { textArea.copy() }).also { it.accelerator = KeyStroke.getKeyStroke("control C") }
-        pasteItem = JMenuItem(action("Paste") { textArea.paste() }).also {
+            JMenuItem(action("Copy") { editor.copy() }).also {
+                it.accelerator = KeyStroke.getKeyStroke("control C")
+            }
+        pasteItem = JMenuItem(action("Paste") { editor.paste() }).also {
             it.accelerator = KeyStroke.getKeyStroke("control V")
         }
-        deleteItem = JMenuItem(action("Delete") { textArea.replaceSelection("") }).also {
+        deleteItem = JMenuItem(action("Delete") { editor.replaceSelection("") }).also {
             it.accelerator = KeyStroke.getKeyStroke("DELETE")
         }
-        selectAllItem = JMenuItem(action("Select All") { textArea.selectAll() }).also {
+        selectAllItem = JMenuItem(action("Select All") { editor.selectAll() }).also {
             it.accelerator = KeyStroke.getKeyStroke("control A")
         }
 
         // Create 'open in' menu items
         openInMenu = JMenu("Open in...")
         openInGoogleItem =
-            JMenuItem(action("Google") { textArea.selectedText?.let { openIn(SearchEngine.GOOGLE, it) } })
-        openInBingItem = JMenuItem(action("Bing") { textArea.selectedText?.let { openIn(SearchEngine.BING, it) } })
-        openInYahooItem = JMenuItem(action("Yahoo") { textArea.selectedText?.let { openIn(SearchEngine.YAHOO, it) } })
+            JMenuItem(action("Google") { editor.selectedText?.let { openIn(SearchEngine.GOOGLE, it) } })
+        openInBingItem = JMenuItem(action("Bing") { editor.selectedText?.let { openIn(SearchEngine.BING, it) } })
+        openInYahooItem =
+            JMenuItem(action("Yahoo") { editor.selectedText?.let { openIn(SearchEngine.YAHOO, it) } })
         openInYandexItem =
-            JMenuItem(action("Yandex") { textArea.selectedText?.let { openIn(SearchEngine.YANDEX, it) } })
+            JMenuItem(action("Yandex") { editor.selectedText?.let { openIn(SearchEngine.YANDEX, it) } })
         openInDuckDuckGoItem =
-            JMenuItem(action("DuckDuckGo") { textArea.selectedText?.let { openIn(SearchEngine.DUCKDUCKGO, it) } })
+            JMenuItem(action("DuckDuckGo") { editor.selectedText?.let { openIn(SearchEngine.DUCKDUCKGO, it) } })
         openInYouTubeItem =
-            JMenuItem(action("YouTube") { textArea.selectedText?.let { openIn(SearchEngine.YOUTUBE, it) } })
+            JMenuItem(action("YouTube") { editor.selectedText?.let { openIn(SearchEngine.YOUTUBE, it) } })
+        openInYouTubeItem =
+            JMenuItem(action("Wikipedia") { editor.selectedText?.let { openIn(SearchEngine.WIKIPEDIA, it) } })
+        openInYouTubeItem =
+            JMenuItem(action("GitHub") { editor.selectedText?.let { openIn(SearchEngine.GITHUB, it) } })
 
         // Create 'view' menu items
         viewMenu = JMenu("View")
         wordWrapItem = JCheckBoxMenuItem(action("Word Wrap") { toggleWordWrap() })
         fontItem = JMenuItem(action("Font") { configureFont() })
-        settingsItem = JMenuItem(action("Settings") { configureTheme() })
 
         // Add items to their corresponding menu.
         fileMenu.add(newFileItem)
         fileMenu.add(openFileItem)
+        fileMenu.add(recentFilesMenu)
         fileMenu.add(saveFileItem)
         fileMenu.add(saveAsFileItem)
         fileMenu.addSeparator()
@@ -162,7 +177,6 @@ internal class Editor(file: File?) {
         editMenu.add(openInMenu)
         viewMenu.add(wordWrapItem)
         viewMenu.add(fontItem)
-        viewMenu.add(settingsItem)
 
         // Add menus to menu bar
         menuBar.add(fileMenu)
@@ -171,79 +185,92 @@ internal class Editor(file: File?) {
 
         // Scrollable text area.
         val scrollPane =
-            JScrollPane(textArea, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED)
-        textArea.isEditable = true
-        textArea.wrapStyleWord = true
-        textArea.border = BorderFactory.createEmptyBorder(6, 6, 6, 6)
+            JScrollPane(editor, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
+                JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED)
+        editor.isEditable = true
+        editor.wrapStyleWord = true
+        editor.border = BorderFactory.createEmptyBorder(6, 6, 6, 6)
         scrollPane.border = BorderFactory.createEmptyBorder()
 
-//        Settings.theme = themeSettings.exportConfiguration()
-//        Settings.theme = "FlatLaf IntelliJ"
-//        Settings.font = textArea.font
-//        Settings.init()
-
-//        themeSettings.setConfiguration(Settings.theme)
-//        themeSettings.apply()
+        Settings.recentFiles.forEach { recentFilesMenu.add(JMenuItem(action(it.name) { openFile(it) })) }
 
         wordWrapItem.state = Settings.wordWrap
-        textArea.lineWrap = Settings.wordWrap
-        textArea.font = Settings.font
+        editor.lineWrap = Settings.wordWrap
+        editor.font = Settings.font
+        editor.addKeyListener(object : KeyAdapter() {
+            override fun keyPressed(e: KeyEvent) {
+                updateTitle()
+            }
+
+            override fun keyReleased(e: KeyEvent?) {
+                updateTitle()
+            }
+        })
 
         // Frame properties.
-        frame.jMenuBar = menuBar
-        frame.add(scrollPane)
-        frame.setSize(500, 500)
+        this.jMenuBar = menuBar
+        this.add(scrollPane)
+        this.setSize(500, 500)
 
-        frame.defaultCloseOperation = JFrame.DO_NOTHING_ON_CLOSE
+        this.defaultCloseOperation = JFrame.DO_NOTHING_ON_CLOSE
 
-        frame.setLocation(
-            (Toolkit.getDefaultToolkit().screenSize.width - frame.width) / 2,
-            (Toolkit.getDefaultToolkit().screenSize.height - frame.height) / 2
+        this.maximizable = true
+        this.resizable = true
+        this.isClosable = true
+        this.isIconifiable = true
+
+        this.setLocation(
+            (mainFrame.width - this.width) / 2,
+            (mainFrame.height - this.height) / 2
         )
 
         if (file != null) {
             openFile(file)
         }
 
-        frame.isVisible = true
-    }
+        updateTitle()
 
-    private fun configureTheme() {
-//        ThemeSettings.showSettingsDialog(frame, Dialog.ModalityType.APPLICATION_MODAL)
-//        val config = themeSettings.exportConfiguration()
-//        if (Settings.theme != config) {
-//            Settings.theme = config
-//            Settings.save()
-//        }
+        this.isVisible = true
 
-        SettingsDialog(frame, "Settings", true).apply {
-            setLocationRelativeTo(frame)
-            isVisible = true
+        if (file != null) {
+            throw RuntimeException("Just a debug exception")
         }
     }
 
+    private fun addToRecentFiles(file: File) {
+        val recentFiles = Settings.recentFiles.toMutableList()
+        recentFiles.remove(file)
+        recentFiles.add(0, file)
+        if (recentFiles.size > 10) {
+            recentFiles.removeAt(10)
+        }
+        recentFilesMenu.removeAll()
+        recentFiles.forEach { recentFilesMenu.add(JMenuItem(action(it.name) { openFile(it) })) }
+        Settings.recentFiles = recentFiles.toList()
+    }
+
     private fun configureFont() {
-        val fontChooser = FontChooserDialog(frame, modal = true, font = textArea.font)
+        val fontChooser = FontChooserDialog(mainFrame, modal = true, font = editor.font)
         fontChooser.isVisible = true
         if (!fontChooser.isCancelled) {
-            textArea.font = fontChooser.selectedFont
-            Settings.font = textArea.font
+            editor.font = fontChooser.selectedFont
+            Settings.font = editor.font
         }
     }
 
     private fun toggleWordWrap() {
-        textArea.lineWrap = !textArea.lineWrap
-        wordWrapItem.state = textArea.lineWrap
-        Settings.wordWrap = textArea.lineWrap
+        editor.lineWrap = !editor.lineWrap
+        wordWrapItem.state = editor.lineWrap
+        Settings.wordWrap = editor.lineWrap
     }
 
     private fun close() {
         if (checkForUnsavedChanges()) return
-        frame.dispose()
+        this.dispose()
     }
 
     private fun printFile() {
-        textArea.print()
+        editor.print()
     }
 
     private fun pageSetup() {
@@ -253,29 +280,42 @@ internal class Editor(file: File?) {
 
     fun open() {
         val fileChooser = JFileChooser()
-        fileChooser.showOpenDialog(frame)
+        fileChooser.showOpenDialog(this)
         openFile(fileChooser.selectedFile)
     }
 
     fun openFile(file: File?) {
         if (checkForUnsavedChanges()) return
         if (file != null) {
-            textArea.text = try {
+            editor.text = try {
                 file.readText()
             } catch (e: IOException) {
-                JOptionPane.showMessageDialog(frame, "Error opening file.\n${e.localizedMessage}", "Error",
+                JOptionPane.showMessageDialog(this, "Error opening file.\n${e.localizedMessage}", "Error",
                     JOptionPane.ERROR_MESSAGE)
                 return
             }
+            updateTitle()
+            editor.caretPosition = 0
+            addToRecentFiles(file)
             lastFile = file
-            lastSavedText = textArea.text
+            lastSavedText = editor.text
+        }
+    }
+
+    private fun updateTitle() {
+        val indicator = if (unsavedChanges) " (Modified)" else ""
+
+        lastFile?.let {
+            this.title = "$baseTitle - ${it.name}$indicator"
+        } ?: run {
+            this.title = "$baseTitle - Untitled$indicator"
         }
     }
 
     private fun newFile() {
         if (checkForUnsavedChanges()) return
-        textArea.text = ""
-        lastSavedText = textArea.text
+        editor.text = ""
+        lastSavedText = editor.text
         lastFile = null
     }
 
@@ -285,14 +325,6 @@ internal class Editor(file: File?) {
             desktop.browse(search)
         } catch (e: IOException) {
             e.printStackTrace()
-        }
-    }
-
-    private fun action(name: String, function: () -> Unit): Action {
-        return object : AbstractAction(name) {
-            override fun actionPerformed(e: ActionEvent) {
-                function()
-            }
         }
     }
 
@@ -320,12 +352,12 @@ internal class Editor(file: File?) {
     }
 
     private fun saveTo(
-        fi: File, text: String = textArea.text, encoding: Charset = Charset.defaultCharset(),
+        file: File, text: String = editor.text, encoding: Charset = Charset.defaultCharset(),
         saveAsCopy: Boolean = false
     ): Boolean {
         try {
             // Create a file writer
-            val wr = FileWriter(fi, encoding, false)
+            val wr = FileWriter(file, encoding, false)
 
             // Create buffered writer to write
             val w = BufferedWriter(wr)
@@ -337,18 +369,20 @@ internal class Editor(file: File?) {
 
             if (!saveAsCopy) {
                 lastSavedText = text
-                lastFile = fi
+                lastFile = file
+                addToRecentFiles(file)
+                updateTitle()
             }
             return !unsavedChanges
         } catch (evt: Exception) {
-            JOptionPane.showMessageDialog(frame, evt.message)
+            JOptionPane.showMessageDialog(this, evt.message)
         }
         return false
     }
 
     private fun checkForUnsavedChanges(): Boolean {
         if (unsavedChanges) {
-            val dialog = JOptionPane.showConfirmDialog(frame, "Do you want to save changes?", "Save",
+            val dialog = JOptionPane.showConfirmDialog(this, "Do you want to save changes?", "Save",
                 JOptionPane.YES_NO_CANCEL_OPTION)
             if (dialog == JOptionPane.YES_OPTION) {
                 if (!save()) {
@@ -360,86 +394,6 @@ internal class Editor(file: File?) {
         }
         return false
     }
-
-//    // If a button is pressed
-//    override fun actionPerformed(e: ActionEvent) {
-//        val s = e.actionCommand
-//        when (s) {
-//            "Cut" -> {
-//                textArea.cut()
-//            }
-//            "Copy" -> {
-//                textArea.copy()
-//            }
-//            "Paste" -> {
-//                textArea.paste()
-//            }
-//            "Select All" -> {
-//                textArea.selectAll()
-//            }
-//            "Save" -> {
-//                save()
-//            }
-//            "Print" -> {
-//                try {
-//                    // print the file
-//                    textArea.print()
-//                } catch (evt: Exception) {
-//                    JOptionPane.showMessageDialog(frame, evt.message)
-//                }
-//            }
-//            "Open" -> {
-//                // Create an object of JFileChooser class
-//                val j = JFileChooser("f:")
-//
-//                // Invoke the showsOpenDialog function to show the save dialog
-//                val r = j.showOpenDialog(null)
-//
-//                // If the user selects a file
-//                if (r == JFileChooser.APPROVE_OPTION) {
-//                    // Set the label to the path of the selected directory
-//                    val fi = File(j.selectedFile.absolutePath)
-//                    try {
-//                        // String
-//                        var s1: String
-//                        var sl: String
-//
-//                        // File reader
-//                        val fr = FileReader(fi)
-//
-//                        // Buffered reader
-//                        val br = BufferedReader(fr)
-//
-//                        // Initialize sl
-//                        sl = br.readLine()
-//
-//                        // Take the input from the file
-//                        while (br.readLine().also { s1 = it } != null) {
-//                            sl = """
-//                                $sl
-//                                $s1
-//                                """.trimIndent()
-//                        }
-//
-//                        // Set the text
-//                        textArea.text = sl
-//                    } catch (evt: Exception) {
-//                        JOptionPane.showMessageDialog(frame, evt.message)
-//                    }
-//                } else JOptionPane.showMessageDialog(frame, "the user cancelled the operation")
-//            }
-//            "New" -> {
-//                textArea.text = ""
-//            }
-//            "Close" -> {
-//                frame.isVisible = false
-//            }
-//            "Word Wrap" -> {
-//                textArea.lineWrap = !textArea.lineWrap
-//                wordWrapItem.state = textArea.lineWrap
-//            }
-//        }
-//    }
 
     companion object {
         lateinit var themesPanel: IJThemesPanel

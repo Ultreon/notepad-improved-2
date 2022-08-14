@@ -1,7 +1,7 @@
 <component name="ProjectRunConfigurationManager">
     <configuration default="false" name="Run Program" type="JetRunConfigurationType">
         <option name="MAIN_CLASS_NAME" value="me.qboi.texteditor.MainKt"/>
-        <module name="darklaf-tests-2.main"/>
+        <module name="notepad-improved.main"/>
         <shortenClasspath name="NONE"/>
         <option name="WORKING_DIRECTORY" value="$ProjectFileDir$/run"/>
         <method v="2">

@@ -1,2 +1,2 @@
-rootProject.name = "qboi-text-editor"
+rootProject.name = "notepad-improved"
 

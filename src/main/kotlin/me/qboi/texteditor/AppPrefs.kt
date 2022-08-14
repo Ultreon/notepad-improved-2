@@ -31,6 +31,7 @@ import com.formdev.flatlaf.IntelliJTheme.ThemeLaf
 import com.formdev.flatlaf.util.LoggingFacade
 import com.formdev.flatlaf.util.StringUtils
 import me.qboi.texteditor.intellijthemes.IJThemesPanel
+import org.apache.commons.lang.SystemUtils
 import java.awt.Font
 import java.beans.PropertyChangeEvent
 import java.io.File
@@ -48,6 +49,7 @@ object AppPrefs {
     const val KEY_FONT_NAME = "fontName"
     const val KEY_FONT_SIZE = "fontSize"
     const val KEY_FONT_STYLE = "fontStyle"
+    const val KEY_RECENT_FILES = "recentFiles"
     const val RESOURCE_PREFIX = "res:"
     const val FILE_PREFIX = "file:"
     const val THEME_UI_KEY = "__FlatLaf.demo.theme"
@@ -63,6 +65,15 @@ object AppPrefs {
     var wordWrap: Boolean
         get() = Preferences.userRoot().getBoolean(KEY_WORD_WRAP, true)
         set(value) = Preferences.userRoot().putBoolean(KEY_WORD_WRAP, value)
+    var recentFiles: List<File>
+        get() = Preferences.userRoot()
+            .get(KEY_RECENT_FILES, "")
+            .split(SystemUtils.PATH_SEPARATOR)
+            .filter { it.isNotEmpty() }
+            .map { File(it) }
+            .filter { it.exists() && it.isFile }
+        set(value) = Preferences.userRoot()
+            .put(KEY_RECENT_FILES, value.joinToString(SystemUtils.PATH_SEPARATOR) { it.absolutePath })
     lateinit var state: Preferences
         private set
 

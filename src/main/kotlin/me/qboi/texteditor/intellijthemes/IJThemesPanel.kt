@@ -92,6 +92,20 @@ class IJThemesPanel : JPanel() {
 
         // add core themes at beginning
         categories[themes.size] = "Core Themes"
+        themes.add(
+            IJThemeInfo(
+                "System Theme",
+                null,
+                false,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                true
+            )
+        )
         if (showLight) themes.add(
             IJThemeInfo(
                 "FlatLaf Light",
@@ -226,7 +240,9 @@ class IJThemesPanel : JPanel() {
         if (themeInfo == null) return
 
         // change look and feel
-        if (themeInfo.lafClassName != null) {
+        if (themeInfo.isSystemTheme) {
+            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName())
+        } else if (themeInfo.lafClassName != null) {
             if (themeInfo.lafClassName == UIManager.getLookAndFeel().javaClass.name) return
             FlatAnimatedLafChange.showSnapshot()
             try {
@@ -246,7 +262,7 @@ class IJThemesPanel : JPanel() {
                 LoggingFacade.INSTANCE.logSevere(null, ex)
                 showInformationDialog("Failed to load '" + themeInfo.themeFile + "'.", ex)
             }
-        } else {
+        } else if (!themeInfo.isSystemTheme) {
             FlatAnimatedLafChange.showSnapshot()
             IntelliJTheme.setup(javaClass.getResourceAsStream(THEMES_PACKAGE + themeInfo.resourceName))
             AppPrefs.state.put(AppPrefs.KEY_LAF_THEME, AppPrefs.RESOURCE_PREFIX + themeInfo.resourceName)
