@@ -10,6 +10,8 @@ enum class SearchEngine(val apply: (String) -> String) {
     DUCKDUCKGO({ "https://duckduckgo.com/?q=$it" }),
     YAHOO({ "https://search.yahoo.com/search?p=$it" }),
     YOUTUBE({ "https://www.youtube.com/results?search_query=$it" }),
+    WIKIPEDIA({ "https://en.wikipedia.org/wiki/Special:Search?search=$it&go=Go" }),
+    GITHUB({ "https://github.com/search?q=$it" }),
     ;
 
     fun search(query: String): URI {

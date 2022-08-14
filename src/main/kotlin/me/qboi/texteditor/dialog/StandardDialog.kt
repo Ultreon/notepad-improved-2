@@ -126,18 +126,20 @@ open class StandardDialog : JDialog, ActionListener {
      *
      * @return the button panel.
      */
-    protected fun createButtonPanel(): JPanel {
+    protected open fun createButtonPanel(): JPanel {
         val buttons = L1R2ButtonPanel(
             "Help",
             "OK",
             "Cancel"
         )
-        val helpButton = buttons.leftButton
-        helpButton.actionCommand = "helpButton"
-        helpButton.addActionListener(this)
+//        val helpButton = buttons.leftButton
+//        helpButton.actionCommand = "helpButton"
+//        helpButton.addActionListener(this)
         val okButton = buttons.rightButton1
         okButton.actionCommand = "okButton"
         okButton.addActionListener(this)
+        okButton.isDefaultCapable = true
+        rootPane.defaultButton = okButton
         val cancelButton = buttons.rightButton2
         cancelButton.actionCommand = "cancelButton"
         cancelButton.addActionListener(this)
