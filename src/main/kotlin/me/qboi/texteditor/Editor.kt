@@ -11,13 +11,14 @@ import java.io.BufferedWriter
 import java.io.File
 import java.io.FileWriter
 import java.io.IOException
-import java.nio.charset.Charset
 import javax.imageio.ImageIO
 import javax.swing.*
 import javax.swing.event.InternalFrameAdapter
 import javax.swing.event.InternalFrameEvent
 
-// Java Program to create a text editor using java
+/**
+ * Java Program to create a text editor using java
+ */
 internal class Editor(file: File?, private val mainFrame: MainFrame) : JInternalFrame("Text Editor") {
     private val baseTitle = "Editor Instance"
     private var fileMenu: JMenu
@@ -59,16 +60,8 @@ internal class Editor(file: File?, private val mainFrame: MainFrame) : JInternal
     // Frame
     private val desktop = Desktop.getDesktop()
 
-//    private val themeSettings = ThemeSettings.getInstance()
-
     // Constructor
     init {
-//        themeSettings.isSystemPreferencesEnabled = true
-//        themeSettings.isThemeFollowsSystem = true
-//        themeSettings.isAccentColorFollowsSystem = true
-//        themeSettings.isFontSizeFollowsSystem = true
-//        themeSettings.isSelectionColorFollowsSystem = true
-
         themesPanel = IJThemesPanel()
 
         val read = ImageIO.read(javaClass.getResource("/me/qboi/texteditor/icons/icon-16x.png"))
@@ -89,10 +82,9 @@ internal class Editor(file: File?, private val mainFrame: MainFrame) : JInternal
 
         // Create 'file' menu items
         fileMenu = JMenu("File")
-        newFileItem =
-            JMenuItem(action("New") { newFile() }).also {
-                it.accelerator = KeyStroke.getKeyStroke("control shift N")
-            }
+        newFileItem = JMenuItem(action("New") { newFile() }).also {
+            it.accelerator = KeyStroke.getKeyStroke("control shift N")
+        }
         openFileItem =
             JMenuItem(action("Open") { open() }).also { it.accelerator = KeyStroke.getKeyStroke("control shift O") }
         recentFilesMenu = JMenu("Recent Files")
@@ -104,22 +96,16 @@ internal class Editor(file: File?, private val mainFrame: MainFrame) : JInternal
         pageSetupFileItem = JMenuItem(action("Page Setup") { pageSetup() })
         printFileItem =
             JMenuItem(action("Print") { printFile() }).also { it.accelerator = KeyStroke.getKeyStroke("control P") }
-        closeItem =
-            JMenuItem(action("Close") { close() }).also { it.accelerator = KeyStroke.getKeyStroke("control W") }
+        closeItem = JMenuItem(action("Close") { close() }).also { it.accelerator = KeyStroke.getKeyStroke("control W") }
 
         // Create 'edit' menu items
         editMenu = JMenu("Edit")
         cutItem =
-            JMenuItem(action("Cut") { editor.cut() }).also {
-                it.accelerator = KeyStroke.getKeyStroke("control X")
-            }
+            JMenuItem(action("Cut") { editor.cut() }).also { it.accelerator = KeyStroke.getKeyStroke("control X") }
         copyItem =
-            JMenuItem(action("Copy") { editor.copy() }).also {
-                it.accelerator = KeyStroke.getKeyStroke("control C")
-            }
-        pasteItem = JMenuItem(action("Paste") { editor.paste() }).also {
-            it.accelerator = KeyStroke.getKeyStroke("control V")
-        }
+            JMenuItem(action("Copy") { editor.copy() }).also { it.accelerator = KeyStroke.getKeyStroke("control C") }
+        pasteItem =
+            JMenuItem(action("Paste") { editor.paste() }).also { it.accelerator = KeyStroke.getKeyStroke("control V") }
         deleteItem = JMenuItem(action("Delete") { editor.replaceSelection("") }).also {
             it.accelerator = KeyStroke.getKeyStroke("DELETE")
         }
@@ -129,21 +115,17 @@ internal class Editor(file: File?, private val mainFrame: MainFrame) : JInternal
 
         // Create 'open in' menu items
         openInMenu = JMenu("Open in...")
-        openInGoogleItem =
-            JMenuItem(action("Google") { editor.selectedText?.let { openIn(SearchEngine.GOOGLE, it) } })
+        openInGoogleItem = JMenuItem(action("Google") { editor.selectedText?.let { openIn(SearchEngine.GOOGLE, it) } })
         openInBingItem = JMenuItem(action("Bing") { editor.selectedText?.let { openIn(SearchEngine.BING, it) } })
-        openInYahooItem =
-            JMenuItem(action("Yahoo") { editor.selectedText?.let { openIn(SearchEngine.YAHOO, it) } })
-        openInYandexItem =
-            JMenuItem(action("Yandex") { editor.selectedText?.let { openIn(SearchEngine.YANDEX, it) } })
+        openInYahooItem = JMenuItem(action("Yahoo") { editor.selectedText?.let { openIn(SearchEngine.YAHOO, it) } })
+        openInYandexItem = JMenuItem(action("Yandex") { editor.selectedText?.let { openIn(SearchEngine.YANDEX, it) } })
         openInDuckDuckGoItem =
             JMenuItem(action("DuckDuckGo") { editor.selectedText?.let { openIn(SearchEngine.DUCKDUCKGO, it) } })
         openInYouTubeItem =
             JMenuItem(action("YouTube") { editor.selectedText?.let { openIn(SearchEngine.YOUTUBE, it) } })
         openInYouTubeItem =
             JMenuItem(action("Wikipedia") { editor.selectedText?.let { openIn(SearchEngine.WIKIPEDIA, it) } })
-        openInYouTubeItem =
-            JMenuItem(action("GitHub") { editor.selectedText?.let { openIn(SearchEngine.GITHUB, it) } })
+        openInYouTubeItem = JMenuItem(action("GitHub") { editor.selectedText?.let { openIn(SearchEngine.GITHUB, it) } })
 
         // Create 'view' menu items
         viewMenu = JMenu("View")
@@ -185,8 +167,7 @@ internal class Editor(file: File?, private val mainFrame: MainFrame) : JInternal
 
         // Scrollable text area.
         val scrollPane =
-            JScrollPane(editor, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
-                JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED)
+            JScrollPane(editor, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED)
         editor.isEditable = true
         editor.wrapStyleWord = true
         editor.border = BorderFactory.createEmptyBorder(6, 6, 6, 6)
@@ -219,10 +200,7 @@ internal class Editor(file: File?, private val mainFrame: MainFrame) : JInternal
         this.isClosable = true
         this.isIconifiable = true
 
-        this.setLocation(
-            (mainFrame.width - this.width) / 2,
-            (mainFrame.height - this.height) / 2
-        )
+        this.setLocation((mainFrame.width - this.width) / 2, (mainFrame.height - this.height) / 2)
 
         if (file != null) {
             openFile(file)
@@ -231,10 +209,6 @@ internal class Editor(file: File?, private val mainFrame: MainFrame) : JInternal
         updateTitle()
 
         this.isVisible = true
-
-        if (file != null) {
-            throw RuntimeException("Just a debug exception")
-        }
     }
 
     private fun addToRecentFiles(file: File) {
@@ -352,12 +326,11 @@ internal class Editor(file: File?, private val mainFrame: MainFrame) : JInternal
     }
 
     private fun saveTo(
-        file: File, text: String = editor.text, encoding: Charset = Charset.defaultCharset(),
-        saveAsCopy: Boolean = false
+        file: File, text: String = editor.text, saveAsCopy: Boolean = false
     ): Boolean {
         try {
             // Create a file writer
-            val wr = FileWriter(file, encoding, false)
+            val wr = FileWriter(file, false)
 
             // Create buffered writer to write
             val w = BufferedWriter(wr)

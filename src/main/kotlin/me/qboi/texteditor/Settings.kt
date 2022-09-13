@@ -25,15 +25,4 @@ object Settings {
 
     //    lateinit var theme: SettingsConfiguration
     lateinit var theme: String
-
-//    private val logger = Logger.getLogger("Settings")
-//
-//    private val settingsFile = File("settings.json")
-//    private val gson = GsonBuilder().setPrettyPrinting().serializeNulls().disableHtmlEscaping().also {
-//        it.registerTypeHierarchyAdapter(Font::class.java, FontAdapter)
-//        it.registerTypeHierarchyAdapter(Color::class.java, ColorAdapter)
-//        it.registerTypeHierarchyAdapter(Point::class.java, PointAdapter)
-//        it.registerTypeHierarchyAdapter(Theme::class.java, ThemeAdapter)
-//        it.registerTypeAdapter(SettingsConfiguration::class.java, SettingsConfigurationInstanceCreator)
-//    }.create()
 }

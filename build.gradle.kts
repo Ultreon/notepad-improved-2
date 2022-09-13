@@ -84,3 +84,8 @@ tasks.test {
 tasks.withType<KotlinCompile> {
     kotlinOptions.jvmTarget = "1.8"
 }
+
+tasks.compileJava {
+    targetCompatibility = "1.8"
+    sourceCompatibility = "1.8"
+}
