@@ -16,7 +16,7 @@ class AboutDialog(owner: Frame?, title: String?, modal: Boolean) : StandardDialo
     }
 
     private fun createContent(): Container {
-        minimumSize = Dimension(400, 490)
+        minimumSize = Dimension(384, 490)
 
         val content = JPanel(BorderLayout())
         aboutPanel = AboutPanel()
