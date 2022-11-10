@@ -118,7 +118,7 @@ class MainFrame : JFrame(appName), Translatable {
         helpMenu.add(newIssueItem)
 
         //Set up the first menu item.
-        issueTrackerItem = JMenuItem(action("main.menu_bar.issue.tracker") { openIssueTracker() })
+        issueTrackerItem = JMenuItem(action("main.menu_bar.help.issue.tracker") { openIssueTracker() })
         issueTrackerItem.mnemonic = KeyEvent.VK_S
         issueTrackerItem.accelerator = KeyStroke.getKeyStroke("control F8")
         helpMenu.add(issueTrackerItem)

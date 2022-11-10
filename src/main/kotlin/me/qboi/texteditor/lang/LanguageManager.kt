@@ -53,5 +53,6 @@ object LanguageManager {
         register("fr-FR")
         register("es-ES")
         register("zh-CN")
+        register("ja-JP")
     }
 }

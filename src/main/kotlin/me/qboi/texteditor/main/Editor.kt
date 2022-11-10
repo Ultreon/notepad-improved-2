@@ -92,7 +92,7 @@ internal class Editor(file: File?, private val mainFrame: MainFrame) : JInternal
             JMenuItem(action("editor.menu_bar.file.open") { open() }).also { it.accelerator =
                 KeyStroke.getKeyStroke("control shift O")
             }
-        recentFilesMenu = JMenu("editor.menu_bar.file.recent")
+        recentFilesMenu = JMenu(action("editor.menu_bar.file.recent"))
         saveFileItem =
             JMenuItem(action("editor.menu_bar.file.save") { save() }).also { it.accelerator =
                 KeyStroke.getKeyStroke("control S")
@@ -110,7 +110,7 @@ internal class Editor(file: File?, private val mainFrame: MainFrame) : JInternal
         }
 
         // Create 'edit' menu items
-        editMenu = JMenu("editor.menu_bar.edit")
+        editMenu = JMenu(action("editor.menu_bar.edit"))
         cutItem =
             JMenuItem(action("editor.menu_bar.edit.cut") { editor.cut() }).also { it.accelerator =
                 KeyStroke.getKeyStroke("control X")
@@ -131,7 +131,7 @@ internal class Editor(file: File?, private val mainFrame: MainFrame) : JInternal
         }
 
         // Create 'open in' menu items
-        openInMenu = JMenu("editor.menu_bar.edit.open_in")
+        openInMenu = JMenu(action("editor.menu_bar.edit.open_in"))
         openInGoogleItem = JMenuItem(action("Google") {
             editor.selectedText?.let {
                 openIn(
