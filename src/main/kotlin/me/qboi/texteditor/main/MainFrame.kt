@@ -1,9 +1,10 @@
-@file:Suppress("LeakingThis")
+package me.qboi.texteditor.main
 
-package me.qboi.texteditor
-
+import me.qboi.texteditor.*
 import me.qboi.texteditor.dialog.AboutDialog
 import me.qboi.texteditor.dialog.settings.SettingsDialog
+import me.qboi.texteditor.lang.Language
+import me.qboi.texteditor.util.Translatable
 import java.awt.Desktop
 import java.awt.Toolkit
 import java.awt.event.KeyEvent
@@ -12,27 +13,35 @@ import java.awt.event.WindowEvent
 import java.beans.PropertyVetoException
 import java.io.File
 import java.net.URI
-import javax.imageio.ImageIO
 import javax.swing.*
-import kotlin.system.exitProcess
 
 /*
  * InternalFrameDemo.java requires:
  *   MyInternalFrame.java
  */
-open class MainFrame : JFrame("Notepad Improved") {
+class MainFrame : JFrame(appName), Translatable {
+    private lateinit var issueTrackerItem: JMenuItem
+    private lateinit var newIssueItem: JMenuItem
+    private lateinit var aboutItem: JMenuItem
+    private lateinit var helpMenu: JMenu
+    private lateinit var quitItem: JMenuItem
+    private lateinit var settingsItem: JMenuItem
+    private lateinit var openItem: JMenuItem
+    private lateinit var newWindowItem: JMenuItem
+    private lateinit var windowMenu: JMenu
     var desktop: JDesktopPane
 
     init {
         // Set instance
         instance = this
+        isRunning = true
 
         //Make the big window be indented 50 pixels from each edge
         //of the screen.
         val screenSize = Toolkit.getDefaultToolkit().screenSize
         this.setSize(1200, 700)
 
-        this.iconImage = ImageIO.read(javaClass.getResource("/me/qboi/texteditor/icons/icon-16x.png"))
+        this.iconImage = appIcon
 
         this.setLocation(
             (screenSize.width - this.width) / 2,
@@ -64,63 +73,55 @@ open class MainFrame : JFrame("Notepad Improved") {
         val menuBar = JMenuBar()
 
         //Set up the lone menu.
-        val windowMenu = JMenu("Window")
+        windowMenu = JMenu(action("main.menu_bar.window"))
         windowMenu.mnemonic = KeyEvent.VK_W
         menuBar.add(windowMenu)
 
         //Set up the first menu item.
-        val newWindowItem = JMenuItem("New Window")
+        newWindowItem = JMenuItem(action("main.menu_bar.window.new") { newWindow() })
         newWindowItem.mnemonic = KeyEvent.VK_N
         newWindowItem.accelerator = KeyStroke.getKeyStroke("control N")
-        newWindowItem.action = action("New") { newWindow() }
         windowMenu.add(newWindowItem)
 
         //Set up the first menu item.
-        val openItem = JMenuItem("Open...")
+        openItem = JMenuItem(action("main.menu_bar.window.open") { openFile() })
         openItem.mnemonic = KeyEvent.VK_O
         openItem.accelerator = KeyStroke.getKeyStroke("control O")
-        openItem.action = action("Open") { openFile() }
         windowMenu.add(openItem)
 
         //Set up the first menu item.
-        val settingsItem = JMenuItem("Open...")
+        settingsItem = JMenuItem(action("main.menu_bar.window.settings") { configureTheme() })
         settingsItem.mnemonic = KeyEvent.VK_O
         settingsItem.accelerator = KeyStroke.getKeyStroke("control O")
-        settingsItem.action = action("Settings") { configureTheme() }
         windowMenu.add(settingsItem)
 
         //Set up the second menu item.
-        val quitItem = JMenuItem("Quit")
+        quitItem = JMenuItem(action("main.menu_bar.window.quit") { quit() })
         quitItem.mnemonic = KeyEvent.VK_Q
         quitItem.accelerator = KeyStroke.getKeyStroke("alt F4")
-        quitItem.action = action("Quit") { quit() }
         windowMenu.add(quitItem)
 
-        val helpMenu = JMenu("Help")
-        windowMenu.mnemonic = KeyEvent.VK_H
+        helpMenu = JMenu(action("main.menu_bar.help"))
+        helpMenu.mnemonic = KeyEvent.VK_H
         menuBar.add(helpMenu)
 
         //Set up the first menu item.
-        val aboutItem = JMenuItem("About")
+        aboutItem = JMenuItem(action("main.menu_bar.help.about") { showAbout() })
         aboutItem.mnemonic = KeyEvent.VK_A
         aboutItem.accelerator = KeyStroke.getKeyStroke("F1")
-        aboutItem.action = action("About") { showAbout() }
         helpMenu.add(aboutItem)
 
         //Set up the first menu item.
-        val newIssueItem = JMenuItem("New Issue")
+        newIssueItem = JMenuItem(action("main.menu_bar.help.issue.new") { openNewIssuePage() })
         newIssueItem.mnemonic = KeyEvent.VK_I
         newIssueItem.accelerator = KeyStroke.getKeyStroke("F8")
-        newIssueItem.action = action("New Issue") { openNewIssuePage() }
         helpMenu.add(newIssueItem)
 
         //Set up the first menu item.
-        val issueTrackerItem = JMenuItem("Issue Tracker")
+        issueTrackerItem = JMenuItem(action("main.menu_bar.issue.tracker") { openIssueTracker() })
         issueTrackerItem.mnemonic = KeyEvent.VK_S
         issueTrackerItem.accelerator = KeyStroke.getKeyStroke("control F8")
-        issueTrackerItem.action = action("Issue Tracker") { openIssueTracker() }
         helpMenu.add(issueTrackerItem)
-
         return menuBar
     }
 
@@ -128,11 +129,11 @@ open class MainFrame : JFrame("Notepad Improved") {
      * Opens the issues tracker page in the default browser.
      */
     private fun openIssueTracker() {
-        Desktop.getDesktop().browse(URI(References.ISSUES_URL))
+        Desktop.getDesktop().browse(URI(appIssues))
     }
 
     private fun openNewIssuePage() {
-        Desktop.getDesktop().browse(URI(References.NEW_ISSUE_URL))
+        Desktop.getDesktop().browse(URI(appNewIssue))
     }
 
     private fun showAbout() {
@@ -176,16 +177,31 @@ open class MainFrame : JFrame("Notepad Improved") {
     protected fun quit() {
         val allUnsavedChanges = desktop.allFrames.filter { it is Editor && it.unsavedChanges }
         if (allUnsavedChanges.isNotEmpty()) {
-            val answer = JOptionPane.showConfirmDialog(this, "There are unsaved changes. Quit anyway?", "Quit",
-                JOptionPane.YES_NO_OPTION)
+            val answer = JOptionPane.showConfirmDialog(
+                this, "There are unsaved changes. Quit anyway?", "Quit",
+                JOptionPane.YES_NO_OPTION
+            )
             if (answer == JOptionPane.NO_OPTION) {
                 return
             }
         }
-        exitProcess(0)
+        dispose()
+    }
+
+    //Quit the application.
+    fun restart() {
+        isRestart = true
+        quit()
+    }
+
+    override fun dispose() {
+        super.dispose()
+        isRunning = false
     }
 
     companion object {
+        var isRunning: Boolean = true
+            internal set
         lateinit var instance: MainFrame
             private set
 
@@ -204,5 +220,18 @@ open class MainFrame : JFrame("Notepad Improved") {
             //Display the window.
             frame.isVisible = true
         }
+    }
+
+    override fun onLanguageChanged(language: Language) {
+//        windowMenu.text = language["main.menu_bar.window"]
+//        newWindowItem.text = language["main.menu_bar.window.new_window"]
+//        openItem.text = language["main.menu_bar.window.open"]
+//        settingsItem.text = language["main.menu_bar.window.settings"]
+//        quitItem.text = language["main.menu_bar.window.quit"]
+//
+//        helpMenu.text = language["main.menu_bar.help"]
+//        aboutItem.text = language["main.menu_bar.help.about"]
+//        newIssueItem.text = language["main.menu_bar.help.new_issue"]
+//        issueTrackerItem.text = language["main.menu_bar.help.new_issue"]
     }
 }

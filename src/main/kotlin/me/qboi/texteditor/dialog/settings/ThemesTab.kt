@@ -2,7 +2,7 @@
 
 package me.qboi.texteditor.dialog.settings
 
-import me.qboi.texteditor.Editor
+import me.qboi.texteditor.main.Editor
 import me.qboi.texteditor.intellijthemes.IJThemesPanel
 import java.awt.Component
 import java.awt.Container
@@ -12,7 +12,7 @@ import javax.swing.Spring
 import javax.swing.SpringLayout
 
 
-class SettingsPanel : JPanel {
+class ThemesTab : JPanel {
     private var themeComboBox: IJThemesPanel
 
     constructor(layout: LayoutManager?, isDoubleBuffered: Boolean) : super(layout, isDoubleBuffered)
@@ -25,11 +25,7 @@ class SettingsPanel : JPanel {
 
         layout = SpringLayout()
 
-//        val label = JLabel("Theme:")
         themeComboBox = Editor.themesPanel
-//        label.labelFor = themeComboBox
-
-//        add(label)
         add(themeComboBox)
 
         //Lay out the panel.

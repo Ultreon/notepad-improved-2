@@ -1,20 +1,33 @@
 package me.qboi.texteditor
 
+import me.qboi.texteditor.lang.LanguageManager
+import me.qboi.texteditor.main.AppPrefs
+import me.qboi.texteditor.main.MainFrame
 import org.oxbow.swingbits.dialog.task.TaskDialogs
+import java.lang.Thread.sleep
 import javax.swing.SwingUtilities
 import javax.swing.UIManager
 import kotlin.system.exitProcess
 
 fun main() {
-    AppPrefs.init("me.qboi.texteditor")
+    AppPrefs.init(appId)
     AppPrefs.setupLaf(arrayOf())
 
-    SwingUtilities.invokeLater {
-        Thread.setDefaultUncaughtExceptionHandler { _, ex ->
-            crash(ex)
-        }
-        MainFrame.start()
+    Thread.setDefaultUncaughtExceptionHandler { _, ex ->
+        crash(ex)
     }
+    LanguageManager.registerDefaults()
+    LanguageManager.freeze()
+
+    do {
+        MainFrame.isRunning = true
+        SwingUtilities.invokeAndWait {
+            MainFrame.start()
+        }
+        while (MainFrame.isRunning) {
+            sleep(50)
+        }
+    } while (isRestart)
 }
 
 @Throws(Exception::class)

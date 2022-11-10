@@ -1,8 +1,11 @@
-package me.qboi.texteditor
+package me.qboi.texteditor.main
 
+import me.qboi.texteditor.action
 import me.qboi.texteditor.dialog.font.FontChooserDialog
 import me.qboi.texteditor.intellijthemes.IJThemesPanel
+import me.qboi.texteditor.lang.Language
 import me.qboi.texteditor.util.SearchEngine
+import me.qboi.texteditor.util.Translatable
 import java.awt.Desktop
 import java.awt.event.KeyAdapter
 import java.awt.event.KeyEvent
@@ -19,7 +22,7 @@ import javax.swing.event.InternalFrameEvent
 /**
  * Java Program to create a text editor using java
  */
-internal class Editor(file: File?, private val mainFrame: MainFrame) : JInternalFrame("Text Editor") {
+internal class Editor(file: File?, private val mainFrame: MainFrame) : JInternalFrame("Text Editor"), Translatable {
     private val baseTitle = "Editor Instance"
     private var fileMenu: JMenu
     private var newFileItem: JMenuItem
@@ -64,7 +67,7 @@ internal class Editor(file: File?, private val mainFrame: MainFrame) : JInternal
     init {
         themesPanel = IJThemesPanel()
 
-        val read = ImageIO.read(javaClass.getResource("/me/qboi/texteditor/icons/icon-16x.png"))
+        val read = ImageIO.read(javaClass.getResource("/icons/app-16x.png"))
         this.frameIcon = ImageIcon(read)
         this.iconable = true
         this.isDoubleBuffered = true
@@ -81,56 +84,120 @@ internal class Editor(file: File?, private val mainFrame: MainFrame) : JInternal
         })
 
         // Create 'file' menu items
-        fileMenu = JMenu("File")
-        newFileItem = JMenuItem(action("New") { newFile() }).also {
+        fileMenu = JMenu(action("editor.menu_bar.file"))
+        newFileItem = JMenuItem(action("editor.menu_bar.file.new") { newFile() }).also {
             it.accelerator = KeyStroke.getKeyStroke("control shift N")
         }
         openFileItem =
-            JMenuItem(action("Open") { open() }).also { it.accelerator = KeyStroke.getKeyStroke("control shift O") }
-        recentFilesMenu = JMenu("Recent Files")
+            JMenuItem(action("editor.menu_bar.file.open") { open() }).also { it.accelerator =
+                KeyStroke.getKeyStroke("control shift O")
+            }
+        recentFilesMenu = JMenu("editor.menu_bar.file.recent")
         saveFileItem =
-            JMenuItem(action("Save") { save() }).also { it.accelerator = KeyStroke.getKeyStroke("control S") }
-        saveAsFileItem = JMenuItem(action("Save As") { saveAs() }).also {
+            JMenuItem(action("editor.menu_bar.file.save") { save() }).also { it.accelerator =
+                KeyStroke.getKeyStroke("control S")
+            }
+        saveAsFileItem = JMenuItem(action("editor.menu_bar.file.save.as") { saveAs() }).also {
             it.accelerator = KeyStroke.getKeyStroke("control shift S")
         }
-        pageSetupFileItem = JMenuItem(action("Page Setup") { pageSetup() })
+        pageSetupFileItem = JMenuItem(action("editor.menu_bar.file.print.page_setup") { pageSetup() })
         printFileItem =
-            JMenuItem(action("Print") { printFile() }).also { it.accelerator = KeyStroke.getKeyStroke("control P") }
-        closeItem = JMenuItem(action("Close") { close() }).also { it.accelerator = KeyStroke.getKeyStroke("control W") }
+            JMenuItem(action("editor.menu_bar.file.print") { printFile() }).also { it.accelerator =
+                KeyStroke.getKeyStroke("control P")
+            }
+        closeItem = JMenuItem(action("editor.menu_bar.file.close") { close() }).also { it.accelerator =
+            KeyStroke.getKeyStroke("control W")
+        }
 
         // Create 'edit' menu items
-        editMenu = JMenu("Edit")
+        editMenu = JMenu("editor.menu_bar.edit")
         cutItem =
-            JMenuItem(action("Cut") { editor.cut() }).also { it.accelerator = KeyStroke.getKeyStroke("control X") }
+            JMenuItem(action("editor.menu_bar.edit.cut") { editor.cut() }).also { it.accelerator =
+                KeyStroke.getKeyStroke("control X")
+            }
         copyItem =
-            JMenuItem(action("Copy") { editor.copy() }).also { it.accelerator = KeyStroke.getKeyStroke("control C") }
+            JMenuItem(action("editor.menu_bar.edit.copy") { editor.copy() }).also { it.accelerator =
+                KeyStroke.getKeyStroke("control C")
+            }
         pasteItem =
-            JMenuItem(action("Paste") { editor.paste() }).also { it.accelerator = KeyStroke.getKeyStroke("control V") }
-        deleteItem = JMenuItem(action("Delete") { editor.replaceSelection("") }).also {
+            JMenuItem(action("editor.menu_bar.edit.paste") { editor.paste() }).also { it.accelerator =
+                KeyStroke.getKeyStroke("control V")
+            }
+        deleteItem = JMenuItem(action("editor.menu_bar.edit.delete") { editor.replaceSelection("") }).also {
             it.accelerator = KeyStroke.getKeyStroke("DELETE")
         }
-        selectAllItem = JMenuItem(action("Select All") { editor.selectAll() }).also {
+        selectAllItem = JMenuItem(action("editor.menu_bar.edit.select_all") { editor.selectAll() }).also {
             it.accelerator = KeyStroke.getKeyStroke("control A")
         }
 
         // Create 'open in' menu items
-        openInMenu = JMenu("Open in...")
-        openInGoogleItem = JMenuItem(action("Google") { editor.selectedText?.let { openIn(SearchEngine.GOOGLE, it) } })
-        openInBingItem = JMenuItem(action("Bing") { editor.selectedText?.let { openIn(SearchEngine.BING, it) } })
-        openInYahooItem = JMenuItem(action("Yahoo") { editor.selectedText?.let { openIn(SearchEngine.YAHOO, it) } })
-        openInYandexItem = JMenuItem(action("Yandex") { editor.selectedText?.let { openIn(SearchEngine.YANDEX, it) } })
+        openInMenu = JMenu("editor.menu_bar.edit.open_in")
+        openInGoogleItem = JMenuItem(action("Google") {
+            editor.selectedText?.let {
+                openIn(
+                    SearchEngine.GOOGLE,
+                    it
+                )
+            }
+        })
+        openInBingItem =
+            JMenuItem(action("Bing") { editor.selectedText?.let { openIn(SearchEngine.BING, it) } })
+        openInYahooItem = JMenuItem(action("Yahoo") {
+            editor.selectedText?.let {
+                openIn(
+                    SearchEngine.YAHOO,
+                    it
+                )
+            }
+        })
+        openInYandexItem = JMenuItem(action("Yandex") {
+            editor.selectedText?.let {
+                openIn(
+                    SearchEngine.YANDEX,
+                    it
+                )
+            }
+        })
         openInDuckDuckGoItem =
-            JMenuItem(action("DuckDuckGo") { editor.selectedText?.let { openIn(SearchEngine.DUCKDUCKGO, it) } })
+            JMenuItem(action("DuckDuckGo") {
+                editor.selectedText?.let {
+                    openIn(
+                        SearchEngine.DUCKDUCKGO,
+                        it
+                    )
+                }
+            })
         openInYouTubeItem =
-            JMenuItem(action("YouTube") { editor.selectedText?.let { openIn(SearchEngine.YOUTUBE, it) } })
+            JMenuItem(action("YouTube") {
+                editor.selectedText?.let {
+                    openIn(
+                        SearchEngine.YOUTUBE,
+                        it
+                    )
+                }
+            })
         openInYouTubeItem =
-            JMenuItem(action("Wikipedia") { editor.selectedText?.let { openIn(SearchEngine.WIKIPEDIA, it) } })
-        openInYouTubeItem = JMenuItem(action("GitHub") { editor.selectedText?.let { openIn(SearchEngine.GITHUB, it) } })
+            JMenuItem(action("Wikipedia") {
+                editor.selectedText?.let {
+                    openIn(
+                        SearchEngine.WIKIPEDIA,
+                        it
+                    )
+                }
+            })
+        openInYouTubeItem = JMenuItem(action("GitHub") {
+            editor.selectedText?.let {
+                openIn(
+                    SearchEngine.GITHUB,
+                    it
+                )
+            }
+        })
 
         // Create 'view' menu items
-        viewMenu = JMenu("View")
-        wordWrapItem = JCheckBoxMenuItem(action("Word Wrap") { toggleWordWrap() })
-        fontItem = JMenuItem(action("Font") { configureFont() })
+        viewMenu = JMenu(action("editor.menu_bar.view"))
+        wordWrapItem = JCheckBoxMenuItem(action("editor.menu_bar.view.word_wrap") { toggleWordWrap() })
+        fontItem = JMenuItem(action("editor.menu_bar.view.font") { configureFont() })
 
         // Add items to their corresponding menu.
         fileMenu.add(newFileItem)
@@ -264,8 +331,10 @@ internal class Editor(file: File?, private val mainFrame: MainFrame) : JInternal
             editor.text = try {
                 file.readText()
             } catch (e: IOException) {
-                JOptionPane.showMessageDialog(this, "Error opening file.\n${e.localizedMessage}", "Error",
-                    JOptionPane.ERROR_MESSAGE)
+                JOptionPane.showMessageDialog(
+                    this, "Error opening file.\n${e.localizedMessage}", "Error",
+                    JOptionPane.ERROR_MESSAGE
+                )
                 return
             }
             updateTitle()
@@ -355,8 +424,10 @@ internal class Editor(file: File?, private val mainFrame: MainFrame) : JInternal
 
     private fun checkForUnsavedChanges(): Boolean {
         if (unsavedChanges) {
-            val dialog = JOptionPane.showConfirmDialog(this, "Do you want to save changes?", "Save",
-                JOptionPane.YES_NO_CANCEL_OPTION)
+            val dialog = JOptionPane.showConfirmDialog(
+                this, "Do you want to save changes?", "Save",
+                JOptionPane.YES_NO_CANCEL_OPTION
+            )
             if (dialog == JOptionPane.YES_OPTION) {
                 if (!save()) {
                     return true
@@ -371,5 +442,9 @@ internal class Editor(file: File?, private val mainFrame: MainFrame) : JInternal
     companion object {
         lateinit var themesPanel: IJThemesPanel
             private set
+    }
+
+    override fun onLanguageChanged(language: Language) {
+        println("Language changed in editor.")
     }
 }

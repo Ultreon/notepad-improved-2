@@ -27,8 +27,8 @@ import com.formdev.flatlaf.extras.FlatAnimatedLafChange
 import com.formdev.flatlaf.extras.FlatSVGIcon
 import com.formdev.flatlaf.util.LoggingFacade
 import com.formdev.flatlaf.util.StringUtils
-import me.qboi.texteditor.AppPrefs
-import me.qboi.texteditor.Settings
+import me.qboi.texteditor.main.AppPrefs
+import me.qboi.texteditor.main.Settings
 import net.miginfocom.swing.MigLayout
 import java.awt.Component
 import java.awt.Desktop
@@ -240,10 +240,12 @@ class IJThemesPanel : JPanel() {
         if (themeInfo == null) return
 
         // change look and feel
-        if (themeInfo.isSystemTheme) {
+        if (themeInfo.isSystemTheme) { // CHANGE: (Ultreon) Allow system theme
+            FlatAnimatedLafChange.stop()
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName())
         } else if (themeInfo.lafClassName != null) {
             if (themeInfo.lafClassName == UIManager.getLookAndFeel().javaClass.name) return
+            FlatAnimatedLafChange.stop()
             FlatAnimatedLafChange.showSnapshot()
             try {
                 UIManager.setLookAndFeel(themeInfo.lafClassName)
@@ -262,7 +264,7 @@ class IJThemesPanel : JPanel() {
                 LoggingFacade.INSTANCE.logSevere(null, ex)
                 showInformationDialog("Failed to load '" + themeInfo.themeFile + "'.", ex)
             }
-        } else if (!themeInfo.isSystemTheme) {
+        } else {
             FlatAnimatedLafChange.showSnapshot()
             IntelliJTheme.setup(javaClass.getResourceAsStream(THEMES_PACKAGE + themeInfo.resourceName))
             AppPrefs.state.put(AppPrefs.KEY_LAF_THEME, AppPrefs.RESOURCE_PREFIX + themeInfo.resourceName)
@@ -466,7 +468,7 @@ class IJThemesPanel : JPanel() {
      *
      */
     // Added set theme with name for user preference.
-    fun setTheme(themeInfo: String) {
+    fun setTheme() {
 
     }
 

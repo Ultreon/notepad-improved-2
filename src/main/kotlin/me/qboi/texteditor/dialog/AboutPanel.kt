@@ -1,6 +1,7 @@
 package me.qboi.texteditor.dialog
 
-import me.qboi.texteditor.References
+import me.qboi.texteditor.appBannerRef
+import me.qboi.texteditor.appName
 import java.awt.Graphics
 import java.awt.Rectangle
 import javax.swing.JPanel
@@ -15,8 +16,8 @@ class AboutPanel : JPanel() {
 
         createHTMLView = BasicHTML.createHTMLView(this, javaClass.getResourceAsStream("/docs/about.html")?.let {
             val readText = it.bufferedReader().readText()
-                .replace("@(project-name)", References.APP_NAME)
-                .replace("@(image)", References.APP_ICON)
+                .replace("@(project-name)", appName)
+                .replace("@(image)", appBannerRef)
             it.close()
             return@let readText
         } ?: """

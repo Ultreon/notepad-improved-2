@@ -1,6 +1,6 @@
 package me.qboi.texteditor.dialog
 
-import me.qboi.texteditor.References
+import me.qboi.texteditor.appSources
 import me.qboi.texteditor.dialog.font.L1R2ButtonPanel
 import java.awt.*
 import java.awt.event.ActionEvent
@@ -32,7 +32,7 @@ class AboutDialog(owner: Frame?, title: String?, modal: Boolean) : StandardDialo
     override fun actionPerformed(event: ActionEvent) {
         when (event.actionCommand) {
             "sourceButton" -> {
-                Desktop.getDesktop().browse(URI(References.SOURCE_URL))
+                Desktop.getDesktop().browse(URI(appSources))
             }
 
             else -> super.actionPerformed(event)

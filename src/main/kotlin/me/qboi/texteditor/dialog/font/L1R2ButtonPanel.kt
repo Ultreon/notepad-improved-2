@@ -1,5 +1,6 @@
 package me.qboi.texteditor.dialog.font
 
+import me.qboi.texteditor.action
 import java.awt.BorderLayout
 import java.awt.GridLayout
 import javax.swing.JButton
@@ -89,10 +90,10 @@ internal class L1R2ButtonPanel
 
     init {
         layout = BorderLayout()
-        leftButton = JButton(label1)
+        leftButton = JButton(action(label1))
         val rightButtonPanel = JPanel(GridLayout(1, 2))
-        rightButton1 = JButton(label2)
-        rightButton2 = JButton(label3)
+        rightButton1 = JButton(action(label2))
+        rightButton2 = JButton(action(label3))
         rightButtonPanel.add(rightButton1)
         rightButtonPanel.add(rightButton2)
         add(leftButton, BorderLayout.WEST)

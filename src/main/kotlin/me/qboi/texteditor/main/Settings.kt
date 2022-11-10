@@ -1,4 +1,4 @@
-package me.qboi.texteditor
+package me.qboi.texteditor.main
 
 import java.awt.Font
 import java.io.File

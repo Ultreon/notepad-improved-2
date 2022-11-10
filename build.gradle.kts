@@ -35,6 +35,7 @@ dependencies {
     implementation("org.drjekyll:fontchooser:2.4")
     implementation("com.google.code.gson:gson:2.9.0")
     implementation("com.miglayout:miglayout-swing:11.0")
+    implementation("org.springframework:spring-core:5.3.23")
     testImplementation(kotlin("test"))
     implementation("org.bidib.org.oxbow:swingbits:1.2.2")
 }
