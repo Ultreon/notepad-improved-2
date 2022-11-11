@@ -57,7 +57,7 @@ jobs:
         with:
           java-version: ${{ matrix.java }}
       - name: make gradle wrapper executable
-        run: chmod ./gradlew +x
+        run: chmod +x ./gradlew
       - name: build
         run: ./gradlew jpackage
         env:
