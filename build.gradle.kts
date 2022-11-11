@@ -119,6 +119,7 @@ tasks.jpackage {
         icon = "icons/icons.icns"
         macPackageIdentifier = "com.ultreon.notepadimproved"
         macPackageName = "notepad-improved"
+        appVersion = packageVersion.replace(Regex("(\\d+\\.\\d+\\.\\d+).*"), "$1")
     }
 
     linux {
