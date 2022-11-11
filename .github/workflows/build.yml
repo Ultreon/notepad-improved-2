@@ -87,7 +87,7 @@ jobs:
         with:
           java-version: ${{ matrix.java }}
       - name: build
-        run: gradlew jpackage
+        run: gradlew.bat jpackage
         env:
           GITHUB_BUILD_NUMBER: ${{ github.run_number }}
       - name: capture the build artifacts
