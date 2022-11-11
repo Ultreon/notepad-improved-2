@@ -101,7 +101,7 @@ tasks.jpackage {
     destination = "$buildDir/dist"
 
     appName = "Notepad Improved 2"
-    appVersion = packageVersion
+    appVersion = project.version.toString()
     vendor = "Ultreon Team"
     copyright = "Copyright (c) 2022 Ultreon Team"
     runtimeImage = System.getProperty("java.home")
@@ -111,7 +111,8 @@ tasks.jpackage {
 
     destination = "$buildDir/dist"
 
-    licenseFile = "$projectDir/LICENSE.rtf"
+    licenseFile = "$projectDir/package/LICENSE.txt"
+    aboutUrl = "https://github.com/Ultreon/notepad-improved-2"
 
     javaOptions = listOf("-Dfile.encoding=UTF-8")
 
@@ -125,6 +126,11 @@ tasks.jpackage {
     linux {
         icon = "icons/icons.png"
         linuxPackageName = "notepad-improved"
+        linuxDebMaintainer = "Ultreon Team"
+        linuxRpmLicenseType = "Ultreon API License v1.1"
+        linuxAppRelease = "2"
+        linuxShortcut = true
+        appVersion = project.version.toString()
     }
 
     windows {
@@ -135,5 +141,8 @@ tasks.jpackage {
         winPerUserInstall = true
         winShortcutPrompt = true
         winShortcut = false
+        winUpgradeUuid = "0dd76e9b-dd95-495d-876e-9da69c86329c"
+        winMenuGroup = "Ultreon Team"
+        appVersion = (version as String).replace("+local", ".0").replace("+", ".")
     }
 }
