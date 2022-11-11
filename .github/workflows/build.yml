@@ -75,7 +75,7 @@ jobs:
             17    # Minimum supported
         ]
         # and run on both Linux and not Windows
-        os: [macOS-11]
+        os: [windows-2019]
     runs-on: ${{ matrix.os }}
     steps:
       - name: checkout repository
