@@ -7,10 +7,15 @@ import java.time.format.DateTimeFormatter
 plugins {
     kotlin("jvm") version "1.7.10"
     id("java")
+    id("org.panteleyev.jpackageplugin") version "1.5.0"
 }
 
+val projectVersion = property("project_version")
+
 group = "com.ultreon"
-version = properties["version"] as String
+version = "${projectVersion}+${if (System.getenv("GITHUB_BUILD_NUMBER") == null) "local" else System.getenv("GITHUB_BUILD_NUMBER")}"
+
+val packageVersion = (version as String).replace("+local", ".0").replace("+", ".")
 
 val buildDate = ZonedDateTime.now()
 
@@ -41,16 +46,6 @@ dependencies {
 }
 
 tasks.jar {
-    for (it in configurations.implementation.get().files) {
-        if (!it.path.startsWith(projectDir.path)) {
-            if (it.isDirectory) {
-                from(it)
-            } else {
-                from(zipTree(it))
-            }
-        }
-    }
-
     exclude("META-INF/*.RSA", "META-INF/*.DSA", "META-INF/*.SF")
 
     //noinspection GroovyAssignabilityCheck
@@ -60,7 +55,7 @@ tasks.jar {
             Pair("Implementation-Title", "QBubbles"),
             Pair("Implementation-Vendor", "QTech Community"),
             Pair("Implementation-Version", "1.0-indev1"),
-            Pair("Main-Class", "me.qboi.texteditor.MainKt"),
+            Pair("Main-Class", "com.ultreon.notepadimproved.MainKt"),
             Pair("Multi-Release", "true")
         ))
     }
@@ -83,10 +78,61 @@ tasks.test {
 }
 
 tasks.withType<KotlinCompile> {
-    kotlinOptions.jvmTarget = "1.8"
+    kotlinOptions.jvmTarget = "17"
 }
 
 tasks.compileJava {
-    targetCompatibility = "1.8"
-    sourceCompatibility = "1.8"
+    targetCompatibility = "17"
+    sourceCompatibility = "17"
+}
+
+task("copyDependencies", Copy::class) {
+    from(configurations.runtimeClasspath).into("$buildDir/jars")
+}
+
+task("copyJar", Copy::class) {
+    from(tasks.jar).into("$buildDir/jars")
+}
+
+tasks.jpackage {
+    dependsOn("build", "copyDependencies", "copyJar")
+
+    input  = "$buildDir/jars"
+    destination = "$buildDir/dist"
+
+    appName = "Notepad Improved 2"
+    appVersion = packageVersion
+    vendor = "Ultreon Team"
+    copyright = "Copyright (c) 2022 Ultreon Team"
+    runtimeImage = System.getProperty("java.home")
+
+    mainJar = tasks.jar.get().archiveFileName.get()
+    mainClass = "com.ultreon.notepadimproved.MainKt"
+
+    destination = "$buildDir/dist"
+
+    licenseFile = "$projectDir/LICENSE.rtf"
+
+    javaOptions = listOf("-Dfile.encoding=UTF-8")
+
+    mac {
+        icon = "icons/icons.icns"
+        macPackageIdentifier = "com.ultreon.notepadimproved"
+        macPackageName = "notepad-improved"
+    }
+
+    linux {
+        icon = "icons/icons.png"
+        linuxPackageName = "notepad-improved"
+    }
+
+    windows {
+        icon = "icons/icons.ico"
+        winMenu = true
+        winDirChooser = true
+        winConsole = false
+        winPerUserInstall = true
+        winShortcutPrompt = true
+        winShortcut = false
+    }
 }
