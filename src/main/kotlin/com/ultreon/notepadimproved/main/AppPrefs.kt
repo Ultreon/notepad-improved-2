@@ -94,21 +94,27 @@ object AppPrefs {
                 val lafClassName = state[KEY_LAF, FlatLightLaf::class.java.name]
                 if (IntelliJTheme.ThemeLaf::class.java.name == lafClassName) {
                     val theme = state[KEY_LAF_THEME, ""]
-                    if (theme.startsWith(RESOURCE_PREFIX)) IntelliJTheme.setup(
-                        IJThemesPanel::class.java.getResourceAsStream(
-                            IJThemesPanel.THEMES_PACKAGE + theme.substring(
-                                RESOURCE_PREFIX.length
-                            )
-                        )
-                    ) else if (theme.startsWith(FILE_PREFIX)) FlatLaf.setup(
-                        IntelliJTheme.createLaf(
-                            FileInputStream(
-                                theme.substring(
-                                    FILE_PREFIX.length
+                    if (theme.startsWith(RESOURCE_PREFIX)) {
+                        IntelliJTheme.setup(
+                            IJThemesPanel::class.java.getResourceAsStream(
+                                IJThemesPanel.THEMES_PACKAGE + theme.substring(
+                                    RESOURCE_PREFIX.length
                                 )
                             )
                         )
-                    ) else FlatLightLaf.setup()
+                    } else if (theme.startsWith(FILE_PREFIX)) {
+                        FlatLaf.setup(
+                            IntelliJTheme.createLaf(
+                                FileInputStream(
+                                    theme.substring(
+                                        FILE_PREFIX.length
+                                    )
+                                )
+                            )
+                        )
+                    } else {
+                        FlatLightLaf.setup()
+                    }
                     if (theme.isNotEmpty()) UIManager.getLookAndFeelDefaults()[THEME_UI_KEY] = theme
                 } else if (FlatPropertiesLaf::class.java.name == lafClassName) {
                     val theme = state[KEY_LAF_THEME, ""]

@@ -16,6 +16,7 @@ fun main() {
     Thread.setDefaultUncaughtExceptionHandler { _, ex ->
         crash(ex)
     }
+
     LanguageManager.registerDefaults()
     LanguageManager.freeze()
 

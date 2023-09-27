@@ -31,12 +31,11 @@ configurations {
 
 dependencies {
 //    implementation("com.github.weisj:darklaf-core:3.0.0")
-    implementation("com.formdev:flatlaf:2.4")
-    implementation("com.formdev:flatlaf-intellij-themes:2.4")
-    implementation("com.formdev:flatlaf-extras:2.4")
-    implementation("com.formdev:flatlaf-swingx:2.4")
+    implementation("com.formdev:flatlaf:3.0")
+    implementation("com.formdev:flatlaf-intellij-themes:3.0")
+    implementation("com.formdev:flatlaf-extras:3.0")
+    implementation("com.formdev:flatlaf-swingx:3.0")
     implementation("commons-lang:commons-lang:2.6")
-//    implementation("com.formdev:flatlaf-jide-oss:2.4")
     implementation("org.drjekyll:fontchooser:2.4")
     implementation("com.google.code.gson:gson:2.9.0")
     implementation("com.miglayout:miglayout-swing:11.0")

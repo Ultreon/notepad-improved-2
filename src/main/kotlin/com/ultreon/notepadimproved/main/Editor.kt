@@ -288,6 +288,12 @@ internal class Editor(file: File?, private val mainFrame: MainFrame) : JInternal
         recentFilesMenu.removeAll()
         recentFiles.forEach { recentFilesMenu.add(JMenuItem(action(it.name) { openFile(it) })) }
         Settings.recentFiles = recentFiles.toList()
+
+        this.`hello world this is with spaces`()
+    }
+
+    fun `hello world this is with spaces`() {
+
     }
 
     private fun configureFont() {
