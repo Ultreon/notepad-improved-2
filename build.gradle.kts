@@ -5,7 +5,7 @@ import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 
 plugins {
-    kotlin("jvm") version "1.7.10"
+    kotlin("jvm") version "1.9.22"
     id("java")
     id("org.panteleyev.jpackageplugin") version "1.5.0"
 }
@@ -30,11 +30,10 @@ configurations {
 }
 
 dependencies {
-//    implementation("com.github.weisj:darklaf-core:3.0.0")
-    implementation("com.formdev:flatlaf:3.0")
-    implementation("com.formdev:flatlaf-intellij-themes:3.0")
-    implementation("com.formdev:flatlaf-extras:3.0")
-    implementation("com.formdev:flatlaf-swingx:3.0")
+    implementation("com.formdev:flatlaf:3.4")
+    implementation("com.formdev:flatlaf-intellij-themes:3.4")
+    implementation("com.formdev:flatlaf-extras:3.4")
+    implementation("com.formdev:flatlaf-swingx:3.4")
     implementation("commons-lang:commons-lang:2.6")
     implementation("org.drjekyll:fontchooser:2.4")
     implementation("com.google.code.gson:gson:2.9.0")

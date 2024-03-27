@@ -43,7 +43,7 @@ class MainFrame : JFrame(appName), Translatable {
         val toolkit = Toolkit.getDefaultToolkit()
         val screenSize = toolkit.screenSize
 
-        this.iconImage = appIcon
+        this.iconImages = listOf(appIcon, appIcon16X)
 
         minimumSize = Dimension(800, 450)
 
